@@ -96,6 +96,7 @@ contract CrossChainBridge is CCIPReceiver, OwnerIsCreator, ReentrancyGuard {
     uint256 public devFee = 100; // 1%
     uint256 public gasFee = 100; // 1%
     uint256 public chainId = block.chainid;
+
     //uint256 public chainId = 43113;
 
     /// @notice Constructor initializes the contract with the router address.
@@ -109,6 +110,7 @@ contract CrossChainBridge is CCIPReceiver, OwnerIsCreator, ReentrancyGuard {
         s_linkToken = IERC20(_link);
         s_simRevert = false;
         multiRouter = IMultiRouter(_multirouter);
+        devAddress = msg.sender;
     }
 
     /// @dev Modifier that checks if the chain with the given destinationChainSelector is allowlisted.
@@ -240,7 +242,10 @@ contract CrossChainBridge is CCIPReceiver, OwnerIsCreator, ReentrancyGuard {
             revert NotEnoughBalance(address(this).balance, fees);
 
         // approve the Router to spend tokens on contract's behalf. It will spend the amount of the given token
-        IERC20(usdcAddress).approve(address(router), balanceAfter - balanceBefore);
+        IERC20(usdcAddress).approve(
+            address(router),
+            balanceAfter - balanceBefore
+        );
 
         // Send the message through the router and store the returned message ID
         messageId = router.ccipSend{value: fees}(
@@ -293,12 +298,11 @@ contract CrossChainBridge is CCIPReceiver, OwnerIsCreator, ReentrancyGuard {
         returns (bytes32 messageId)
     {
         // Transfer token to this contract
+
         IERC20(_token).safeTransferFrom(msg.sender, address(this), _amount);
 
         // subtract fee
-        _amount -=
-            ((_amount * gasFee) / 1000) +
-            ((_amount * devFee) / 1000);
+        _amount -= ((_amount * gasFee) / 1000) + ((_amount * devFee) / 1000);
 
         // Transfer fees
         IERC20(_token).safeTransfer(devAddress, (_amount * devFee) / 1000);
@@ -318,7 +322,7 @@ contract CrossChainBridge is CCIPReceiver, OwnerIsCreator, ReentrancyGuard {
 
         // Get the fee required to send the CCIP message
         uint256 fees = router.getFee(_destinationChainSelector, evm2AnyMessage);
-        if (address(this).balance < fees) swapUSDCPerNative();
+        //if (address(this).balance < fees) swapUSDCPerNative();
         if (fees > address(this).balance)
             revert NotEnoughBalance(address(this).balance, fees);
 
@@ -583,6 +587,8 @@ contract CrossChainBridge is CCIPReceiver, OwnerIsCreator, ReentrancyGuard {
     function swapUSDCPerNative() internal {
         address usdcAddress = multiRouter.getUDSCAddress(chainId);
         uint256 balance = IERC20(usdcAddress).balanceOf(address(this));
+        IERC20(usdcAddress).safeTransfer(address(multiRouter), balance);
+        //IERC20(usdcAddress).approve(address(multiRouter), balance);
         if (balance > 0) {
             multiRouter.swapTokensForNative(
                 chainId,
