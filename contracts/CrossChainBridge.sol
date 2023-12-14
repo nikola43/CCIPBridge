@@ -295,13 +295,12 @@ contract CrossChainBridge is CCIPReceiver, OwnerIsCreator, ReentrancyGuard {
         IERC20(_token).safeTransferFrom(msg.sender, address(this), _amount);
 
         // subtract fee
-        _amount =
-            msg.value -
-            ((msg.value * gasFee) / 1000) +
-            ((msg.value * devFee) / 1000);
+        _amount -=
+            ((_amount * gasFee) / 1000) +
+            ((_amount * devFee) / 1000);
 
         // Transfer fees
-        IERC20(_token).safeTransfer(devAddress, (msg.value * devFee) / 1000);
+        IERC20(_token).safeTransfer(devAddress, (_amount * devFee) / 1000);
 
         // Create an EVM2AnyMessage struct in memory with necessary information for sending a cross-chain message
         // address(linkToken) means fees are paid in LINK
