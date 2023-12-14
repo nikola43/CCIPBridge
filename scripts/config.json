@@ -1,0 +1,30 @@
+[
+    {
+        "name": "base_goerli",
+        "chainId": 84531,
+        "router": "0x80af2f44ed0469018922c9f483dc5a909862fdc2",
+        "swapRouter": "0xbe92671bdd1a1062E1A9F3Be618e399Fb5faCAcE",
+        "sourceChain": "5790810961207155433",
+        "allowedChains": [
+            "5790810961207155433",
+            "14767482510784806043"
+        ],
+        "link": "0xd886e2286fd1073df82462ea1822119600af80b6",
+        "native": "0x4200000000000000000000000000000000000006",
+        "usdc": "0xf175520c52418dfe19c8098071a252da48cd1c19"
+    },
+    {
+        "name": "avalanche_fuji",
+        "chainId": 43113,
+        "router": "0xf694e193200268f9a4868e4aa017a0118c9a8177",
+        "swapRouter": "0x688d21b0B8Dc35971AF58cFF1F7Bf65639937860",
+        "sourceChain": "14767482510784806043",
+        "allowedChains": [
+            "5790810961207155433",
+            "14767482510784806043"
+        ],
+        "link": "0x0b9d5D9136855f6FEc3c0993feE6E9CE8a297846",
+        "native": "0xd00ae08403B9bbb9124bB305C09058E32C39A48c",
+        "usdc": "0x5425890298aed601595a70AB815c96711a31Bc65"
+    }
+]
