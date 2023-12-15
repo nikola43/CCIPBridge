@@ -95,9 +95,8 @@ contract CrossChainBridge is CCIPReceiver, OwnerIsCreator, ReentrancyGuard {
 
     uint256 public devFee = 100; // 1%
     uint256 public gasFee = 100; // 1%
-    uint256 public chainId = block.chainid;
-
-    //uint256 public chainId = 43113;
+    //uint256 public chainId = block.chainid;
+    uint256 public chainId = 43113;
 
     /// @notice Constructor initializes the contract with the router address.
     /// @param _router The address of the router contract.

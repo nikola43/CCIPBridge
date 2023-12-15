@@ -56,6 +56,7 @@ describe("Token contract", async () => {
         const chainConfig = config.find((c: any) => c.chainId === chainId);
         crossChainBridge = await new CrossChainBridge__factory(deployer).deploy(chainConfig.router, chainConfig.link, multiRouter.address)
         await crossChainBridge.deployed()
+        console.log(`${colors.cyan('Cross Chain Bridge Address')}: ${colors.yellow(crossChainBridge.address)}`)
 
         await crossChainBridge.setDevAddress(deployer.address)
 
@@ -75,67 +76,105 @@ describe("Token contract", async () => {
         }
     })
 
-    
+
     it("5. Deposit eth", async () => {
         const chainId = 84531;
         const chainConfig = config.find((c: any) => c.chainId === chainId);
         const destination = chainConfig.allowedChains[0];
-        await crossChainBridge.sendNativeMessage(destination, crossChainBridge.address, "a", { value: ethers.utils.parseEther("0.1") })
+        const tx = await (await crossChainBridge.sendNativeMessage(destination, crossChainBridge.address, "a", { value: ethers.utils.parseEther("0.1") })).wait()
+        /*
+        console.log({
+            tx: tx.transactionHash
+        })
+        */
+
+        const MessageSentLog = tx.logs.find((log) => {
+            try {
+                return crossChainBridge.interface.parseLog(log).name === "MessageSent"
+            } catch (e) {
+                /*
+                console.log({
+                    error: e
+                })
+                */
+            }
+        })
+        const parsedLog = crossChainBridge.interface.parseLog(MessageSentLog!)
+        console.log({
+            parsedLog: parsedLog
+        })
+        const { messageId, tokenAmount, token } = parsedLog.args
+        /*
+        tx.logs.map((log) => {
+            try {
+                const parsedLog = crossChainBridge.interface.parseLog(log)
+                console.log({
+                    parsedLog: parsedLog
+                })
+            } catch (e) {
+                console.log({
+                    error: e
+                })
+            }
+        })
+        */
     })
 
 
-    
-    
+
+
+    /*
     it("5. Withdraw eth", async () => {
         await crossChainBridge.withdraw(bob.address, parseEther("0.0000001"))
     })
-    
-        
-
-        /*
-    it("5. Buy USDC", async () => {
-        const chainId = 43113;
-        const chainConfig = config.find((c: any) => c.chainId === chainId);
-        const router = await test_util.connectRouter()
-
-        const whale = "0xF745b439965c66425958159e91E7e04224Fed29D"
-        await hre.network.provider.request({
-            method: "hardhat_impersonateAccount",
-            params: [whale],
-        });
-
-        const signer = await ethers.getSigner(whale)
-
-        const usdcToken = await ethers.getContractAt("MyToken", chainConfig.usdc)
-
-        await usdcToken.connect(signer).transfer(bob.address, parseUnits("1000", 6))
-
-        const usdcBalance = await usdcToken.balanceOf(bob.address)
-        console.log(`${colors.cyan('USDC Balance')}: ${colors.yellow(usdcBalance.toString())}`)
-
-
-        //await test_util.swapExactETHForTokens(chainConfig.usdc, router, bob, parseEther("1"));
-    })
-
-
-    it("5. Deposit Tokens", async () => {
-        const chainId = 43113;
-        const chainConfig = config.find((c: any) => c.chainId === chainId);
-        const destination = chainConfig.allowedChains[0];
-
-        const usdcToken = await ethers.getContractAt("MyToken", chainConfig.usdc)
-
-        await usdcToken.connect(bob).approve(crossChainBridge.address, parseUnits("10000000000", 6))
-        await crossChainBridge.connect(bob).sendTokenMessage(destination, crossChainBridge.address, "a", chainConfig.usdc, parseUnits("100", 6))
-    })
-
-    
-    it("5. Withdraw tokens", async () => {
-        const chainId = 43113;
-        const chainConfig = config.find((c: any) => c.chainId === chainId);
-        await crossChainBridge.withdrawToken(bob.address, chainConfig.usdc, parseUnits("5", 6))
-    })
     */
-    
+
+
+
+    /*
+it("5. Buy USDC", async () => {
+    const chainId = 43113;
+    const chainConfig = config.find((c: any) => c.chainId === chainId);
+    const router = await test_util.connectRouter()
+
+    const whale = "0xF745b439965c66425958159e91E7e04224Fed29D"
+    await hre.network.provider.request({
+        method: "hardhat_impersonateAccount",
+        params: [whale],
+    });
+
+    const signer = await ethers.getSigner(whale)
+
+    const usdcToken = await ethers.getContractAt("MyToken", chainConfig.usdc)
+
+    await usdcToken.connect(signer).transfer(bob.address, parseUnits("1000", 6))
+
+    const usdcBalance = await usdcToken.balanceOf(bob.address)
+    console.log(`${colors.cyan('USDC Balance')}: ${colors.yellow(usdcBalance.toString())}`)
+
+
+    //await test_util.swapExactETHForTokens(chainConfig.usdc, router, bob, parseEther("1"));
+})
+
+
+it("5. Deposit Tokens", async () => {
+    const chainId = 43113;
+    const chainConfig = config.find((c: any) => c.chainId === chainId);
+    const destination = chainConfig.allowedChains[0];
+
+    const usdcToken = await ethers.getContractAt("MyToken", chainConfig.usdc)
+
+    await usdcToken.connect(bob).approve(crossChainBridge.address, parseUnits("10000000000", 6))
+    await crossChainBridge.connect(bob).sendTokenMessage(destination, crossChainBridge.address, "a", chainConfig.usdc, parseUnits("100", 6))
+})
+
+ 
+it("5. Withdraw tokens", async () => {
+    const chainId = 43113;
+    const chainConfig = config.find((c: any) => c.chainId === chainId);
+    await crossChainBridge.withdrawToken(bob.address, chainConfig.usdc, parseUnits("5", 6))
+})
+*/
+
 });
 
